@@ -1,29 +1,35 @@
 pipeline {
     agent any
 
+    environment {
+        DOCKER_IMAGE = "YOUR_DOCKERHUB_USER/my-web-app"
+        CONTAINER_NAME = "my-web-app-container"
+    }
+
     stages {
         stage('Clone') {
             steps {
                 checkout scm
             }
         }
-        stage('Install') {
+        stage('Build Docker Image') {
             steps {
-                echo 'Checking environment and dependencies...'
-                sh 'node -v || true'
-                sh 'ls -la'
+                sh "docker build -t ${DOCKER_IMAGE}:${BUILD_NUMBER} -t ${DOCKER_IMAGE}:latest ."
             }
         }
-        stage('Test') {
+        stage('Push to Docker Hub') {
             steps {
-                echo 'Running tests...'
-                sh 'echo "Test stage passed on Linux container"'
+                withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh 'echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin'
+                    sh "docker push ${DOCKER_IMAGE}:${BUILD_NUMBER}"
+                    sh "docker push ${DOCKER_IMAGE}:latest"
+                }
             }
         }
-        stage('Build') {
+        stage('Deploy Container') {
             steps {
-                echo 'Building the web application...'
-                sh 'pwd'
+                sh "docker rm -f ${CONTAINER_NAME} || true"
+                sh "docker run -d --name ${CONTAINER_NAME} -p 3000:3000 ${DOCKER_IMAGE}:latest"
             }
         }
     }
