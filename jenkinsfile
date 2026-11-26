@@ -1,0 +1,27 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Clone') {
+            steps {
+                checkout scm
+            }
+        }
+        stage('Install') {
+            steps {
+                bat 'npm install'
+            }
+        }
+        stage('Test') {
+            steps {
+                bat 'npm test'
+            }
+        }
+        stage('Build') {
+            steps {
+                echo 'Building the web application...'
+                bat 'dir'
+            }
+        }
+    }
+}
