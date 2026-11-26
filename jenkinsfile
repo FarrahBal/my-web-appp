@@ -2,9 +2,9 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = "YOUR_DOCKERHUB_USER/my-web-app"
-        CONTAINER_NAME = "my-web-app-container"
-    }
+    DOCKER_IMAGE = "farrahbal/my-web-appp"
+    CONTAINER_NAME = "my-web-app-container"
+}
 
     stages {
         stage('Clone') {
